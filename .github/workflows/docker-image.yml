@@ -1,0 +1,49 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Semantic Version
+      uses: paulhatch/semantic-version@v4.0.2
+      with:
+        major_pattern: "major:"
+        minor_pattern: "feat:"
+        format: "${major}.${minor}.${patch}-prerelease${increment}"
+      id: version
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-dept: 0
+    - name: Login docker
+      env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+      run: |
+        echo "Iniciando LOGIN"
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+        echo "LOGIN exitoso"
+    - name: Build Image
+      env:
+        VERSION: ${{steps.version.outputs.version}}
+      run: |
+        docker build -t gongoralucas/githubactions:$VERSION .
+        docker build -t gongoralucas/githubactions:latest .
+    - name: Deploy image
+      env:
+        VERSION: ${{steps.version.outputs.version}}
+      run: |
+        docker push gongoralucas/githubactions:$VERSION
+        docker push gongoralucas/githubactions:latest
+      
+        
+      
