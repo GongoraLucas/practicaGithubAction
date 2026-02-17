@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Semantic Version
       uses: paulhatch/semantic-version@v4.0.2
       with:
@@ -20,10 +24,6 @@ jobs:
         minor_pattern: "feat:"
         format: "${major}.${minor}.${patch}-prerelease${increment}"
       id: version
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
     - name: Login docker
       env:
         DOCKER_USER: ${{secrets.DOCKER_USER}}
